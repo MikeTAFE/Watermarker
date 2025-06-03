@@ -49,6 +49,25 @@ input[type="range"] {
   cursor: pointer;
 }
 
+select {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  appearance: none;       /* remove OS styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 8px 10px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 250px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
 button {
   margin-top: 20px;
   padding: 12px 20px;
