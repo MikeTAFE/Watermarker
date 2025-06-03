@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Docx Image Watermark Tool</title>
+  <title>DOCX image watermark tool</title>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Watermark Images in DOCX</h1>
+  <h1>Watermark images in Word documents (DOCX)</h1>
 
   <div class="control-group">
-    <label for="docxFile">Select Word Document (.docx):</label>
+    <label for="docxFile">Select Word document (.docx):</label>
     <input type="file" id="docxFile" accept=".docx" />
   </div>
 
   <div class="control-group">
-    <label for="wmText">Watermark Text:</label>
+    <label for="wmText">Watermark text:</label>
     <input type="text" id="wmText" value="CONFIDENTIAL" placeholder="Enter watermark text" />
   </div>
 
   <div class="control-group">
-    <label for="wmColor">Text Color:</label>
-    <input type="color" id="wmColor" value="#FF0000" />
+    <label for="wmColour">Text colour:</label>
+    <input type="color" id="wmColour" value="#FF0000" />
   </div>
 
   <div class="control-group">
@@ -33,13 +33,29 @@
   </div>
 
   <div class="control-group">
-    <label for="wmFontSize">Font Size (relative to image width, e.g. 15 = imgWidth / 15):</label>
-    <input type="number" id="wmFontSize" min="5" max="100" value="15" />
+    <label for="wmFontSize">Font size (px):</label>
+    <input
+      type="number"
+      id="wmFontSize"
+      min="8"
+      max="200"
+      value="20"
+      step="1"
+    />
   </div>
 
   <div class="control-group">
-    <label for="wmSpacing">Space Between Watermarks (pixels):</label>
-    <input type="number" id="wmSpacing" min="50" max="1000" value="300" />
+    <label for="wmSpacing">Space between watermarks (px):</label>
+    <input type="number" id="wmSpacing" min="20" max="1000" value="100" />
+  </div>
+
+  <div class="control-group">
+    <label for="textDirection">Watermark direction:</label>
+    <select id="textDirection">
+      <option value="diagonal" selected>Diagonal (default)</option>
+      <option value="horizontal">Horizontal</option>
+      <option value="vertical">Vertical</option>
+    </select>
   </div>
 
   <div class="control-group">

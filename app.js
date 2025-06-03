@@ -3,6 +3,7 @@ const processButton = document.getElementById('processBtn');
 const opacityRange = document.getElementById('wmOpacity');
 const opacityVal = document.getElementById('opacityVal');
 const qualitySlider = document.getElementById('jpegQuality');
+const textDirection = document.getElementById('textDirection');
 const qualityLabel = document.getElementById('jpegQualityValue');
 
 // Get initial button text (button changes to "processing..." during script)
@@ -41,34 +42,55 @@ async function watermarkImage(arrayBuffer, options) {
       ctx.drawImage(img, 0, 0);
 
       // Watermark setup
-      const fontSize = img.width / options.fontDivisor;
+      const fontSize = options.fontSize;
       ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = hexToRGBA(options.color, options.opacity);
+      ctx.fillStyle = hexToRGBA(options.colour, options.opacity);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const spacing = options.spacing;
-      const diagonalAngle = -Math.PI / 4;
+      // Reset any transform
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(diagonalAngle);
-
-      const textWidth = ctx.measureText(options.text).width;
-      const stepX = spacing + textWidth;
-      const stepY = spacing + fontSize;
-
-      const startX = -canvas.height * 1.5;
-      const endX = canvas.height * 1.5;
-      const startY = -canvas.width * 1.5;
-      const endY = canvas.width * 1.5;
-
-      for (let x = startX; x < endX; x += stepX) {
-        for (let y = startY; y < endY; y += stepY) {
-          ctx.fillText(options.text, x, y);
-        }
+      // Setup text drawing based on direction
+      switch (options.textDirection) {
+        case 'horizontal':
+          drawTiledText(0);
+          console.log('horizontal')
+          break;
+        case 'vertical':
+          drawTiledText(Math.PI / 2);
+          console.log('vertical')
+          break;
+        case 'diagonal':
+        default:
+          drawTiledText(-Math.PI / 4);
+          console.log('diagonal')
+          break;
       }
 
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      // Helper function to tile text at a rotation angle
+      function drawTiledText(rotationAngle) {
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rotationAngle);
+
+        const textWidth = ctx.measureText(options.text).width;
+        const stepX = options.spacing + textWidth;
+        const stepY = options.spacing + fontSize;
+
+        const startX = -canvas.height * 1.5;
+        const endX = canvas.height * 1.5;
+        const startY = -canvas.width * 1.5;
+        const endY = canvas.width * 1.5;
+
+        for (let x = startX; x < endX; x += stepX) {
+          for (let y = startY; y < endY; y += stepY) {
+            ctx.fillText(options.text, x, y);
+          }
+        }
+
+        // Reset after drawing
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
 
       // Detect original format from options.filename
       const ext = options.filename.split('.').pop().toLowerCase();
@@ -104,7 +126,7 @@ async function watermarkImage(arrayBuffer, options) {
   });
 }
 
-// Utility: Convert hex color + opacity to rgba string
+// Utility: Convert hex colour + opacity to rgba string
 function hexToRGBA(hex, alpha) {
   const r = parseInt(hex.slice(1,3),16);
   const g = parseInt(hex.slice(3,5),16);
@@ -141,10 +163,11 @@ processButton.onclick = async () => {
   // Get watermark options from UI
   const options = {
     text: document.getElementById('wmText').value.trim() || 'WATERMARK TEXT',
-    color: document.getElementById('wmColor').value,
+    colour: document.getElementById('wmColour').value,
     opacity: parseFloat(document.getElementById('wmOpacity').value),
-    fontDivisor: parseInt(document.getElementById('wmFontSize').value, 10) || 15,
+    fontSize: parseInt(document.getElementById('wmFontSize').value, 10) || 30,
     spacing: parseInt(document.getElementById('wmSpacing').value, 10) || 300,
+    textDirection: textDirection.value,
     jpegQuality: parseFloat(document.getElementById('jpegQuality').value),
   };
 
