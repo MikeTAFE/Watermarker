@@ -1,11 +1,14 @@
 const inputFile = document.getElementById('docxFile');
-const btn = document.getElementById('processBtn');
+const processButton = document.getElementById('processBtn');
 const opacityRange = document.getElementById('wmOpacity');
 const opacityVal = document.getElementById('opacityVal');
 
+// Get initial button text (button changes to "processing..." during script)
+const processButtonText = processButton.innerText;
+
 // Enable button only when a file is selected
 inputFile.addEventListener('change', () => {
-  btn.disabled = !inputFile.files.length;
+  processButton.disabled = !inputFile.files.length;
 });
 
 // Show opacity value
@@ -16,7 +19,12 @@ opacityRange.addEventListener('input', () => {
 async function watermarkImage(arrayBuffer, options) {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    const blob = new Blob([arrayBuffer]);
+    const url = URL.createObjectURL(blob);
+    
     img.onload = () => {
+      URL.revokeObjectURL(url); // clean up
+
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
@@ -63,9 +71,11 @@ async function watermarkImage(arrayBuffer, options) {
         resolve(blob);
       }, 'image/png');
     };
+
     img.onerror = () => reject(new Error('Failed to load image'));
-    const blob = new Blob([arrayBuffer]);
-    img.src = URL.createObjectURL(blob);
+    
+    img.src = url;
+
   });
 }
 
@@ -77,13 +87,13 @@ function hexToRGBA(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-btn.onclick = async () => {
+processButton.onclick = async () => {
   if (!inputFile.files.length) {
     alert('Please select a .docx file.');
     return;
   }
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
+  processButton.disabled = true;
+  processButton.textContent = 'Processing...';
   
   const file = inputFile.files[0];
   const zip = new JSZip();
@@ -92,33 +102,59 @@ btn.onclick = async () => {
   
   const mediaFolder = 'word/media/';
   const files = Object.keys(zip.files);
+
+  // Check if media files (images) are present in document
+  const hasMedia = files.some(f => f.startsWith(mediaFolder));
+  if (!hasMedia) {
+    alert('No images found in the document.');
+    processButton.disabled = false;
+    processButton.textContent = processButtonText;
+    return;
+  }
+
   
   // Get watermark options from UI
   const options = {
-    text: document.getElementById('wmText').value.trim() || 'CONFIDENTIAL',
+    text: document.getElementById('wmText').value.trim() || 'WATERMARK TEXT',
     color: document.getElementById('wmColor').value,
     opacity: parseFloat(document.getElementById('wmOpacity').value),
     fontDivisor: parseInt(document.getElementById('wmFontSize').value, 10) || 15,
     spacing: parseInt(document.getElementById('wmSpacing').value, 10) || 300
   };
+
+  // Supported image extensions/formats
+  const supportedImageRegex = /\.(png|jpe?g|gif|bmp|webp|ico)$/i;
   
   try {
+    
+    // Loop through all files - process if supported file type in media folder
     for (const filename of files) {
-      if (filename.startsWith(mediaFolder)) {
-        const fileData = await zip.file(filename).async('arraybuffer');
-        const watermarkedBlob = await watermarkImage(fileData, options);
-        const watermarkedArrayBuffer = await watermarkedBlob.arrayBuffer();
-        zip.file(filename, watermarkedArrayBuffer);
+      if (filename.startsWith(mediaFolder) && supportedImageRegex.test(filename)) {
+
+        try {
+          const fileData = await zip.file(filename).async('arraybuffer');
+          const watermarkedBlob = await watermarkImage(fileData, options);
+          const watermarkedArrayBuffer = await watermarkedBlob.arrayBuffer();
+          zip.file(filename, watermarkedArrayBuffer);
+        } catch (err) {
+          console.warn(`Skipping ${filename}: ${err.message}`);
+        }
       }
     }
     
-    const newDocxBlob = await zip.generateAsync({ type: 'blob' });
+    const newDocxBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 8 } // Level 1–9 (1 = fast, 9 = best)
+    });
+
+
     saveAs(newDocxBlob, 'watermarked.docx');
   } catch (e) {
     alert('Error processing images: ' + e.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Watermark Images and Download';
+    processButton.disabled = false;
+    processButton.textContent = processButtonText;
   }
 };
 
