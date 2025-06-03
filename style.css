@@ -1,0 +1,63 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+  color: #222;
+  background: #f9f9f9;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+}
+input[type="text"],
+input[type="color"],
+input[type="number"],
+input[type="range"],
+input[type="file"] {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  box-sizing: border-box;
+  transition: border-color 0.25s ease;
+}
+input[type="text"]:focus,
+input[type="color"]:focus,
+input[type="number"]:focus,
+input[type="range"]:focus,
+input[type="file"]:focus {
+  outline: none;
+  border-color: #0078d7;
+}
+button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  background: #0078d7;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+button:hover:not(:disabled) {
+  background: #005a9e;
+}
+button:disabled {
+  background: #aaa;
+  cursor: default;
+}
+.footer {
+  margin-top: 40px;
+  font-size: 0.9rem;
+  text-align: center;
+  color: #666;
+}
