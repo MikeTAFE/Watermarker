@@ -12,25 +12,49 @@
 
   <h1>Watermark Images in DOCX</h1>
 
-  <label for="docxFile">Select Word Document (.docx):</label>
-  <input type="file" id="docxFile" accept=".docx" />
+  <div class="control-group">
+    <label for="docxFile">Select Word Document (.docx):</label>
+    <input type="file" id="docxFile" accept=".docx" />
+  </div>
 
-  <label for="wmText">Watermark Text:</label>
-  <input type="text" id="wmText" value="CONFIDENTIAL" placeholder="Enter watermark text" />
+  <div class="control-group">
+    <label for="wmText">Watermark Text:</label>
+    <input type="text" id="wmText" value="CONFIDENTIAL" placeholder="Enter watermark text" />
+  </div>
 
-  <label for="wmColor">Text Color:</label>
-  <input type="color" id="wmColor" value="#FF0000" />
+  <div class="control-group">
+    <label for="wmColor">Text Color:</label>
+    <input type="color" id="wmColor" value="#FF0000" />
+  </div>
 
-  <label for="wmOpacity">Opacity (0-1): <span id="opacityVal">0.3</span></label>
-  <input type="range" id="wmOpacity" min="0" max="1" step="0.05" value="0.3" />
+  <div class="control-group">
+    <label for="wmOpacity">Opacity (0-1): <span id="opacityVal">0.3</span></label>
+    <input type="range" id="wmOpacity" min="0" max="1" step="0.05" value="0.3" />
+  </div>
 
-  <label for="wmFontSize">Font Size (relative to image width, e.g. 15 = imgWidth / 15):</label>
-  <input type="number" id="wmFontSize" min="5" max="100" value="15" />
+  <div class="control-group">
+    <label for="wmFontSize">Font Size (relative to image width, e.g. 15 = imgWidth / 15):</label>
+    <input type="number" id="wmFontSize" min="5" max="100" value="15" />
+  </div>
 
-  <label for="wmSpacing">Space Between Watermarks (pixels):</label>
-  <input type="number" id="wmSpacing" min="50" max="1000" value="300" />
+  <div class="control-group">
+    <label for="wmSpacing">Space Between Watermarks (pixels):</label>
+    <input type="number" id="wmSpacing" min="50" max="1000" value="300" />
+  </div>
 
-  <button id="processBtn" disabled>Watermark Images and Download</button>
+  <div class="control-group">
+    <label for="jpegQuality">JPEG Quality: <span id="jpegQualityValue">0.8</span></label>
+    <input
+      type="range"
+      id="jpegQuality"
+      min="0.1"
+      max="1"
+      step="0.01"
+      value="0.8"
+    />
+  </div>
+
+  <button id="processBtn" disabled>Watermark images and download</button>
 
   <div class="footer">
     <p>&copy;<span id="copyright-year">2025</span> Michael Kirkwood-Smith</p>

@@ -2,6 +2,8 @@ const inputFile = document.getElementById('docxFile');
 const processButton = document.getElementById('processBtn');
 const opacityRange = document.getElementById('wmOpacity');
 const opacityVal = document.getElementById('opacityVal');
+const qualitySlider = document.getElementById('jpegQuality');
+const qualityLabel = document.getElementById('jpegQualityValue');
 
 // Get initial button text (button changes to "processing..." during script)
 const processButtonText = processButton.innerText;
@@ -16,66 +18,89 @@ opacityRange.addEventListener('input', () => {
   opacityVal.textContent = opacityRange.value;
 });
 
+// Show JPEG quality value
+qualitySlider.addEventListener('input', () => {
+  qualityLabel.textContent = qualitySlider.value;
+});
+
 async function watermarkImage(arrayBuffer, options) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const blob = new Blob([arrayBuffer]);
     const url = URL.createObjectURL(blob);
-    
+
     img.onload = () => {
-      URL.revokeObjectURL(url); // clean up
+      URL.revokeObjectURL(url);
 
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      
+
       // Draw original image
       ctx.drawImage(img, 0, 0);
-      
-      // Prepare watermark properties
+
+      // Watermark setup
       const fontSize = img.width / options.fontDivisor;
       ctx.font = `${fontSize}px Arial`;
       ctx.fillStyle = hexToRGBA(options.color, options.opacity);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      
-      // Rotate & repeat watermark text in tiled pattern
+
       const spacing = options.spacing;
-      const diagonalAngle = -Math.PI / 4; // -45 degrees
-      
+      const diagonalAngle = -Math.PI / 4;
+
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate(diagonalAngle);
-      
+
       const textWidth = ctx.measureText(options.text).width;
       const stepX = spacing + textWidth;
       const stepY = spacing + fontSize;
-      
-      // Calculate tiled pattern bounds (rough estimate)
+
       const startX = -canvas.height * 1.5;
       const endX = canvas.height * 1.5;
       const startY = -canvas.width * 1.5;
       const endY = canvas.width * 1.5;
-      
+
       for (let x = startX; x < endX; x += stepX) {
         for (let y = startY; y < endY; y += stepY) {
           ctx.fillText(options.text, x, y);
         }
       }
-      
-      // Reset transform
+
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      
-      canvas.toBlob(blob => {
-        if (!blob) return reject(new Error('Failed to create blob'));
-        resolve(blob);
-      }, 'image/png');
+
+      // Detect original format from options.filename
+      const ext = options.filename.split('.').pop().toLowerCase();
+
+      let mimeType = 'image/png';
+      let quality = undefined;
+
+      if (ext === 'jpg' || ext === 'jpeg') {
+        mimeType = 'image/jpeg';
+        quality = options.jpegQuality; // pass jpegQuality here
+      } else if (ext === 'png') {
+        mimeType = 'image/png';
+      } else if (ext === 'gif') {
+        mimeType = 'image/png'; // fallback
+      }
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error('Failed to create blob'));
+          resolve(blob);
+        },
+        mimeType,
+        quality
+      );
     };
 
-    img.onerror = () => reject(new Error('Failed to load image'));
-    
-    img.src = url;
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
 
+    img.src = url;
   });
 }
 
@@ -119,7 +144,8 @@ processButton.onclick = async () => {
     color: document.getElementById('wmColor').value,
     opacity: parseFloat(document.getElementById('wmOpacity').value),
     fontDivisor: parseInt(document.getElementById('wmFontSize').value, 10) || 15,
-    spacing: parseInt(document.getElementById('wmSpacing').value, 10) || 300
+    spacing: parseInt(document.getElementById('wmSpacing').value, 10) || 300,
+    jpegQuality: parseFloat(document.getElementById('jpegQuality').value),
   };
 
   // Supported image extensions/formats
@@ -133,7 +159,11 @@ processButton.onclick = async () => {
 
         try {
           const fileData = await zip.file(filename).async('arraybuffer');
-          const watermarkedBlob = await watermarkImage(fileData, options);
+          const watermarkedBlob = await watermarkImage(fileData, {
+            ...options,
+            filename: filename,  // Pass original image filename
+          });
+
           const watermarkedArrayBuffer = await watermarkedBlob.arrayBuffer();
           zip.file(filename, watermarkedArrayBuffer);
         } catch (err) {
