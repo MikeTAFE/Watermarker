@@ -9,7 +9,7 @@ body {
 
 h1 {
   text-align: center;
-  margin-bottom: 1rem;
+  margin: 0 0 2rem;
 }
 
 .control-group {
@@ -101,4 +101,11 @@ button:disabled {
   font-size: 0.9rem;
   text-align: center;
   color: #666;
+}
+
+@media screen and (min-width: 500px) {
+  .footer {
+    display: flex;
+    justify-content: space-between;
+  }
 }
