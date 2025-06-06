@@ -135,6 +135,8 @@ function hexToRGBA(hex, alpha) {
 }
 
 processButton.onclick = async () => {
+  
+  // Check for file
   if (!inputFile.files.length) {
     alert('Please select a .docx file.');
     return;
@@ -142,7 +144,17 @@ processButton.onclick = async () => {
   processButton.disabled = true;
   processButton.textContent = 'Processing...';
   
+  // Get file details
   const file = inputFile.files[0];
+  const originalFileName = file.name;
+
+  // Check for .docx
+  if (!originalFileName.endsWith(".docx")) {
+    alert('Please select a .docx file.');
+    return;
+  }
+
+  // Extract docx contents
   const zip = new JSZip();
   const content = await file.arrayBuffer();
   await zip.loadAsync(content);
@@ -158,7 +170,6 @@ processButton.onclick = async () => {
     processButton.textContent = processButtonText;
     return;
   }
-
   
   // Get watermark options from UI
   const options = {
@@ -201,8 +212,10 @@ processButton.onclick = async () => {
       compressionOptions: { level: 8 } // Level 1–9 (1 = fast, 9 = best)
     });
 
+    // Save Word document
+    const newFileName = originalFileName.replace(/(\.[^\.]+)$/, `-watermarked$1`);
+    saveAs(newDocxBlob, newFileName);
 
-    saveAs(newDocxBlob, 'watermarked.docx');
   } catch (e) {
     alert('Error processing images: ' + e.message);
   } finally {
